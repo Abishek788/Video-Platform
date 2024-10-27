@@ -76,6 +76,6 @@ To run this project, ensure you have the following:
 6. **How It Works**: A step-by-step process of how the platform operates.
 7. **Monitoring & Alerts**: Information about logging and monitoring.
 8. **Future Enhancements**: Optional section for potential upgrades or improvements.
-9. **License**: The license for the project (e.g., MIT, Apache).
+
 
 
