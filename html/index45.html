@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Viewer</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+        #videoDetails, #errorMessage { margin-top: 20px; }
+        #player { width: 100%; max-width: 640px; }
+        select, button { margin-top: 10px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Video Viewer</h1>
+    <div>
+        <input type="text" id="videoIdInput" placeholder="Enter Video ID">
+        <select id="resolutionSelect">
+            <option value="1080p">1080p</option>
+            <option value="720p">720p</option>
+            <option value="360p">360p</option>
+        </select>
+        <button onclick="fetchVideo()">Fetch Video</button>
+    </div>
+    <div id="errorMessage" class="error"></div>
+    <div id="videoDetails">
+        <h2 id="videoTitle"></h2>
+        <p id="videoDescription"></p>
+        <video id="player" controls></video>
+        <p id="availableResolutions"></p>
+    </div>
+
+    <script>
+        const apiUrl = 'https://i71090qh4e.execute-api.us-east-1.amazonaws.com/dev';
+
+        async function fetchVideo() {
+            const videoId = document.getElementById('videoIdInput').value;
+            const resolution = document.getElementById('resolutionSelect').value;
+            
+            const payload = {
+                videoId: videoId,
+                resolution: resolution
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                if (response.ok) {
+                    if (result.body) {
+                        const videoData = JSON.parse(result.body);
+                        displayVideoDetails(videoData);
+                    } else {
+                        throw new Error('Response body is empty');
+                    }
+                } else {
+                    throw new Error(result.body || 'Unknown error occurred');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMessage').textContent = `Error: ${error.message}`;
+                clearVideoDetails();
+            }
+        }
+
+        function displayVideoDetails(video) {
+            document.getElementById('errorMessage').textContent = '';
+            document.getElementById('videoTitle').textContent = video.title || 'No Title';
+            document.getElementById('videoDescription').textContent = video.description || 'No Description';
+            
+            const player = document.getElementById('player');
+            player.src = video.videoUrl || '';
+
+            document.getElementById('availableResolutions').textContent = 
+                `Available Resolutions: ${video.availableResolutions ? video.availableResolutions.join(', ') : 'None'}`;
+        }
+
+        function clearVideoDetails() {
+            document.getElementById('videoTitle').textContent = '';
+            document.getElementById('videoDescription').textContent = '';
+            document.getElementById('player').src = '';
+            document.getElementById('availableResolutions').textContent = '';
+        }
+    </script>
+</body>
+</html>
